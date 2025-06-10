@@ -40,6 +40,18 @@ class MilvusTypedDict(TypedDict):
             show_default=True,
         ),
     ]
+    vector_type: Annotated[
+        str, 
+        click.option(
+            "--vector-type", 
+            type=str, 
+            required=False,
+            default='FloatVector',
+            help="Data type for the vector field, allowed values = \
+                  FloatVector, Float16Vector, BFloat16Vector, default=FloatVector",
+        ),
+    ]
+    
 
 
 class MilvusAutoIndexTypedDict(CommonTypedDict, MilvusTypedDict): ...

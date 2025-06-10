@@ -8,12 +8,15 @@ class MilvusConfig(DBConfig):
     user: str | None = None
     password: SecretStr | None = None
     num_shards: int = 1
+    vector_type: str | None = 'FloatVector'
 
     def to_dict(self) -> dict:
         return {
             "uri": self.uri.get_secret_value(),
             "user": self.user if self.user else None,
             "password": self.password.get_secret_value() if self.password else None,
+            "num_shards": self.num_shards,
+            "vector_type": self.vector_type,
         }
 
     @validator("*")

@@ -51,10 +51,21 @@ class Milvus(VectorDB):
             utility.drop_collection(self.collection_name)
 
         if not utility.has_collection(self.collection_name):
+            vector_type_str = self.db_config['vector_type']
+            log.info(f"Using vector type {vector_type_str}")
+            if vector_type_str == "FloatVector":
+                vector_type = DataType.FLOAT_VECTOR
+            elif vector_type_str == "Float16Vector":
+                vector_type = DataType.FLOAT16_VECTOR
+            elif vector_type_str == "BFloat16Vector":
+                vector_type = DataType.BFLOAT16_VECTOR
+            else:
+                log.info(f"{self.name} unsupported vector type: {vector_type_str}, using FLOAT_VECTOR")
+            
             fields = [
                 FieldSchema(self._primary_field, DataType.INT64, is_primary=True),
                 FieldSchema(self._scalar_field, DataType.INT64),
-                FieldSchema(self._vector_field, DataType.FLOAT_VECTOR, dim=dim),
+                FieldSchema(self._vector_field, vector_type, dim=dim),
             ]
 
             log.info(f"{self.name} create collection: {self.collection_name}")
