@@ -99,13 +99,13 @@ class LanceDBHNSWIndexConfig(LanceDBIndexConfig):
             params["ef_construction"] = self.ef_construction
 
         return params
-
     def search_param(self) -> dict:
         params = {}
         if self.ef != 0:
             params = {"ef": self.ef}
         
         return params
+
 
 _lancedb_case_config = {
     IndexType.IVFPQ: LanceDBIndexConfig,

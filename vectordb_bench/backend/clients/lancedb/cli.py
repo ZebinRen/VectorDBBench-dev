@@ -65,6 +65,7 @@ class LanceDBIVFPQTypedDict(CommonTypedDict, LanceDBTypedDict):
     nprobes: Annotated[int, click.option("--nprobes", type=int, default=0, help="Number of probes for IVFPQ search, unset = use LanceDB default")]
     
 
+
 @cli.command()
 @click_parameter_decorators_from_typed_dict(LanceDBIVFPQTypedDict)
 def LanceDBIVFPQ(**parameters: Unpack[LanceDBIVFPQTypedDict]):
@@ -88,15 +89,17 @@ def LanceDBIVFPQ(**parameters: Unpack[LanceDBIVFPQTypedDict]):
         **parameters,
     )
 
+
 class LanceDBHNSWTypedDict(CommonTypedDict, LanceDBTypedDict):
     m: Annotated[int, click.option("--m", type=int, default=0, help="HNSW parameter m")]
     ef_construction: Annotated[int, click.option("--ef-construction", type=int, default=0, help="HNSW parameter ef_construction")]
     ef: Annotated[int, click.option("--ef", type=int, default=0, help="HNSW search parameter ef")]
 
+
 @cli.command()
 @click_parameter_decorators_from_typed_dict(LanceDBHNSWTypedDict)
 def LanceDBHNSW(**parameters: Unpack[LanceDBHNSWTypedDict]):
-    from .config import LanceDBConfig, LanceDBHNSWIndexConfig, _lancedb_case_config
+    from .config import LanceDBConfig, LanceDBHNSWIndexConfig
 
     run(
         db=DB.LanceDB,

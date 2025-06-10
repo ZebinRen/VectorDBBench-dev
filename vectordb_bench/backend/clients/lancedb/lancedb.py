@@ -1,6 +1,5 @@
 import logging
 from contextlib import contextmanager
-import numpy as np
 
 import lancedb
 import pyarrow as pa
@@ -10,7 +9,6 @@ from ..api import IndexType, VectorDB
 from .config import LanceDBConfig, LanceDBIndexConfig
 
 log = logging.getLogger(__name__)
-
 
 
 class VectorModel(LanceModel):
@@ -51,7 +49,7 @@ class LanceDB(VectorDB):
             db.open_table(self.table_name)
         except Exception:
             schema = pa.schema(
-                [pa.field("id", pa.int64()), pa.field("vector", pa.list_(pa.float64(), list_size=self.dim))]
+                [pa.field("id", pa.int32()), pa.field("vector", pa.list_(pa.float64(), list_size=self.dim))]
             )
             db.create_table(self.table_name, schema=schema, mode="overwrite")
 
@@ -82,59 +80,35 @@ class LanceDB(VectorDB):
         k: int = 100,
         filters: dict | None = None,
     ) -> list[int]:
-        query = np.array(query, dtype=np.float32)
-        
         if filters:
-            if self.case_config.index == IndexType.IVFPQ and 'nprobe' in self.search_config.keys():
-                results = (
-                    self.table.search(query)
-                    .select(["id"])
-                    .where(f"id >= {filters['id']}", prefilter=True)
-                    .limit(k)
-                    .nprobes(self.search_config['nprobes'])
-                    .to_list()
-                )
+            results = (
+                self.table.search(query)
+                .select(["id"])
+                .where(f"id >= {filters['id']}", prefilter=True)
+                .limit(k)
+            )
+            if self.case_config.index == IndexType.IVFPQ and 'nprobes' in self.search_config.keys():
+                results = results.nprobes(self.search_config["nprobes"]).to_list()
             elif self.case_config.index == IndexType.HNSW and 'ef' in self.search_config.keys():
-                results = (
-                    self.table.search(query)
-                    .select(["id"])
-                    .where(f"id >= {filters['id']}", prefilter=True)
-                    .limit(k)
-                    .ef(self.search_config['ef'])
-                    .to_list()
-                )
+                results = results.ef(self.search_config['ef']).to_list()
             else:
-                results = (
-                    self.table.search(query)
-                    .select(["id"])
-                    .where(f"id >= {filters['id']}", prefilter=True)
-                    .limit(k)
-                    .to_list()
-                )
+                results = results.to_list()
         else:
-            if self.case_config.index == IndexType.IVFPQ and 'nprobe' in self.search_config.keys():
-                results = (self.table.search(query)
-                    .select(["id"])
-                    .limit(k)
-                    .nprobes(self.search_config['nprobes'])
-                    .to_list()
-                )
+            results = self.table.search(query).select(["id"]).limit(k)
+            if self.case_config.index == IndexType.IVFPQ and 'nprobes' in self.search_config.keys():
+                results = results.nprobes(self.search_config["nprobes"]).to_list()
             elif self.case_config.index == IndexType.HNSW and 'ef' in self.search_config.keys():
-                results = (self.table.search(query)
-                    .select(["id"])
-                    .limit(k)
-                    .ef(self.search_config['ef'])
-                    .to_list()
-                )
+                results = results.ef(self.search_config['ef']).to_list()
             else:
-                results = self.table.search(query).select(["id"]).limit(k).to_list()
+                results = results.to_list()
+    
         return [int(result["id"]) for result in results]
 
     def optimize(self, data_size: int | None = None):
         if self.table and hasattr(self, "case_config") and self.case_config.index != IndexType.NONE:
             log.info(f"Creating index for LanceDB table ({self.table_name})")
-            self.table.create_index(**self.case_config.index_param())
             log.info(f"Index parameters: {self.case_config.index_param()}")
+            self.table.create_index(**self.case_config.index_param())
             # Better recall with IVF_PQ (though still bad) but breaks HNSW: https://github.com/lancedb/lancedb/issues/2369
             if self.case_config.index in (IndexType.IVFPQ, IndexType.AUTOINDEX):
                 self.table.optimize()
