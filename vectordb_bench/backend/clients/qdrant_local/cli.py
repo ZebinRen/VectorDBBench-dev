@@ -20,6 +20,12 @@ class QdrantLocalTypedDict(CommonTypedDict):
         str,
         click.option("--url", type=str, help="Qdrant url", required=True),
     ]
+    grpc_port: Annotated[
+        int,
+        click.option(
+            "--grpc-port", type=int, default=3334, help="Qdrant gRPC port, default is 3334"
+        ),
+    ]
     on_disk: Annotated[
         bool,
         click.option(
@@ -53,7 +59,8 @@ def QdrantLocal(**parameters: Unpack[QdrantLocalTypedDict]):
     run(
         db=DBTYPE,
         db_config=QdrantLocalConfig(
-            url=SecretStr(parameters["url"])
+            url=SecretStr(parameters["url"]),
+            grpc_port=parameters["grpc_port"],
         ),
         db_case_config=QdrantLocalIndexConfig(
             on_disk=parameters["on_disk"],

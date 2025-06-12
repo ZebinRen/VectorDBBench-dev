@@ -4,10 +4,12 @@ from ..api import DBCaseConfig, DBConfig, IndexType, MetricType
 
 class QdrantLocalConfig(DBConfig):
     url: SecretStr
+    grpc_port: int | None = 3334
     
     def to_dict(self) -> dict:
         return {
             "url": self.url.get_secret_value(),
+            "grpc_port": self.grpc_port,
         }
 
 

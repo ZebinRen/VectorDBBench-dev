@@ -60,6 +60,7 @@ class QdrantLocal(VectorDB):
         self._primary_field = "pk"
         self._vector_field = "vector"
 
+        log.info(f"DB config: {self.db_config}")
         client = QdrantClient(**self.db_config, prefer_grpc=True, timeout=30)
 
         # Lets just print the parameters here for double check
