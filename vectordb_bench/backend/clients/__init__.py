@@ -47,6 +47,7 @@ class DB(Enum):
     Clickhouse = "Clickhouse"
     Vespa = "Vespa"
     LanceDB = "LanceDB"
+    LanceDBServer = "LanceDBServer"
     
 
     @property
@@ -176,6 +177,11 @@ class DB(Enum):
             from .lancedb.lancedb import LanceDB
 
             return LanceDB
+    
+        if self == DB.LanceDBServer:
+            from .lancedb_server.lancedb_server import LanceDBServer
+
+            return LanceDBServer
 
         msg = f"Unknown DB: {self.name}"
         raise ValueError(msg)
@@ -305,6 +311,11 @@ class DB(Enum):
             from .lancedb.config import LanceDBConfig
 
             return LanceDBConfig
+        
+        if self == DB.LanceDBServer:
+            from .lancedb_server.config import LanceDBServerConfig
+
+            return LanceDBServerConfig
 
         msg = f"Unknown DB: {self.name}"
         raise ValueError(msg)
@@ -412,6 +423,11 @@ class DB(Enum):
             from .lancedb.config import _lancedb_case_config
 
             return _lancedb_case_config.get(index_type)
+        
+        if self == DB.LanceDBServer:
+            from .lancedb_server.config import _lancedb_server_case_config
+
+            return _lancedb_server_case_config.get(index_type)
 
         # DB.Pinecone, DB.Chroma, DB.Redis
         return EmptyDBCaseConfig

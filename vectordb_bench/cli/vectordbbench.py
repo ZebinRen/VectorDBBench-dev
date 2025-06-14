@@ -2,6 +2,7 @@ from ..backend.clients.alloydb.cli import AlloyDBScaNN
 from ..backend.clients.aws_opensearch.cli import AWSOpenSearch
 from ..backend.clients.clickhouse.cli import Clickhouse
 from ..backend.clients.lancedb.cli import LanceDB
+from ..backend.clients.lancedb_server.cli import LanceDBServer
 from ..backend.clients.mariadb.cli import MariaDBHNSW
 from ..backend.clients.memorydb.cli import MemoryDB
 from ..backend.clients.milvus.cli import MilvusAutoIndex
@@ -39,7 +40,7 @@ cli.add_command(Vespa)
 cli.add_command(LanceDB)
 cli.add_command(QdrantCloud)
 cli.add_command(QdrantLocal)
-
+cli.add_command(LanceDBServer)
 
 if __name__ == "__main__":
     cli()
